@@ -22,6 +22,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun GameScreen(message: String,gameViewModel: GameViewModel) {
@@ -73,23 +74,34 @@ fun GameScreen(message: String,gameViewModel: GameViewModel) {
         ) {
             // 1. 顯示作者姓名
             Text(
-                text = "作者: ${gameViewModel.playerName}",
+                text = "賽馬遊戲(作者: ${gameViewModel.playerName})",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.Black
             )
             // 2. 顯示分數
-            Text(
+            /*Text(
                 text = "分數: ${gameViewModel.score}",
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.Black,
                 modifier = Modifier.padding(top = 4.dp)
-            )
+            )*/
             // 3. 重新加入原本顯示尺寸的 Text
-            Text(
+           /* Text(
                 text = message + gameViewModel.screenWidthPx.toString() + "*"
                         + gameViewModel.screenHeightPx.toString(),
                 color = Color.Black,
                 modifier = Modifier.padding(top = 4.dp)
+            )*/
+        }
+        if (gameViewModel.winningHorseNumber != 0) {
+            Text(
+                text = "第${gameViewModel.winningHorseNumber}馬獲勝",
+                fontSize = 48.sp, // 加大字體
+                color = Color.Blue,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .background(Color.White.copy(alpha = 0.8f)) // 增加背景以便清晰可見
+                    .padding(16.dp)
             )
         }
 
@@ -106,6 +118,8 @@ fun GameScreen(message: String,gameViewModel: GameViewModel) {
             }, enabled = !gameViewModel.gameRunning){
                 Text("遊戲開始")
             }
+
+
 
         }
 

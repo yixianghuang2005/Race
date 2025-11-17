@@ -1,8 +1,9 @@
 package tw.edu.pu.csim.tcyang.race
 
-class Horse (n : Int) {
-    var HorseX = 0
-    var HorseY = 100 + 320 * n
+import kotlin.random.Random
+class Horse (val horseId: Int, initialY: Int) {
+    var HorseX = 0 // 變數宣告
+    var HorseY = initialY
     var HorseNumber = 0
 
     fun Run (){
@@ -12,6 +13,7 @@ class Horse (n : Int) {
             HorseNumber = 0
         }
 
-        HorseX += (10 ..30).random()
+        // 使用 kotlin.random.Random
+        HorseX += Random.nextInt(10, 31) // 生成 10 到 30 之間的隨機數
     }
- }
+}

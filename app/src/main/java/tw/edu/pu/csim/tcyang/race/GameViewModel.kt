@@ -10,6 +10,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class GameViewModel : ViewModel(){
+    var winningHorseNumber by mutableStateOf(0)
+        private set
+
+    val horses = mutableListOf<Horse>()
+
+
+
 
     var screenWidthPx by mutableStateOf(0f)
         private set
@@ -34,7 +41,7 @@ class GameViewModel : ViewModel(){
         private set
 
     //val horse = Horse()
-    val horses = mutableListOf<Horse>()
+
 
 
 
@@ -43,14 +50,31 @@ class GameViewModel : ViewModel(){
         screenWidthPx = w
         screenHeightPx = h
 
-        for ( i in 0..2){
-            horses.add(Horse(i))
+        if (horses.isEmpty()){
+            for ( i in 0..2){
+                // 初始化馬匹時，給予編號 (1, 2, 3) 和初始位置
+                horses.add(Horse(i + 1, 100 + 320 * i))
+            }
+        }
+        // 確保在設定大小後，初始位置正確 (如果這是第一次設定)
+        if (!gameRunning) {
+            ResetHorses()
+        }
+    }
+
+    fun ResetHorses() {
+        for(horse in horses) {
+            // 這裡直接賦值，要求 HorseX 必須是 var
+            horse.HorseX = 0
         }
     }
 
     fun StartGame() {
         gameRunning = true
         // 回到初使位置
+        winningHorseNumber = 0 // 【新增】開始新遊戲時，重置獲勝編號
+        ResetHorses() // 【新增】開始新遊戲時，重置馬匹位置
+
         circleX = 100f
         circleY = screenHeightPx - 100f
         // 遊戲開始時，重設分數
@@ -61,21 +85,30 @@ class GameViewModel : ViewModel(){
         gameLoopJob = viewModelScope.launch {
             while (gameRunning) { // 每0.1秒循環
                 delay(100)
-                circleX += 10
+                if (winningHorseNumber == 0) {
+                    circleX += 10
 
-                // 處理邊界碰撞
-                if (circleX >= screenWidthPx - 100f){
-                    circleX = 100f
-                    // 需求：碰到右邊邊界,分數+1
-                    score += 1
-                }
-
-                for( i in 0..2){
-                    horses[i].Run()
-                    if(horses[i].HorseX >= screenWidthPx - 300){
-                        horses[i].HorseX = 0
+                    // 處理圓圈邊界碰撞
+                    if (circleX >= screenWidthPx - 100f){
+                        circleX = 100f
+                        // 需求：碰到右邊邊界,分數+1
+                        score += 1
                     }
 
+                    // 處理賽馬移動和獲勝判斷
+                    val finishLineX = screenWidthPx - 300 // 終點線位置，根據馬匹圖形大小調整
+
+                    for( i in 0..2){
+                        horses[i].Run()
+
+                        // 判斷馬匹是否抵達終點
+                        if(horses[i].HorseX >= finishLineX){
+                            // 有馬匹獲勝
+                            winningHorseNumber = horses[i].horseId // 記錄獲勝馬匹編號 (1, 2, 3)
+                            gameRunning = false // 停止遊戲循環
+                            break // 跳出 for 循環
+                        }
+                    }
                 }
 
 
@@ -84,7 +117,9 @@ class GameViewModel : ViewModel(){
     }
     fun MoveCircle(x: Float, y: Float) {
         circleX += x
+        circleX = circleX.coerceIn(50f, screenWidthPx - 50f)
         circleY += y
+        circleY = circleY.coerceIn(50f, screenHeightPx - 50f)
     }
 
 
