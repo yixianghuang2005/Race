@@ -112,11 +112,10 @@ fun GameScreen(message: String,gameViewModel: GameViewModel) {
         ) {
             // 只保留「遊戲開始」按鈕
             Button(onClick = {
-                if (!gameViewModel.gameRunning) {
-                    gameViewModel.StartGame()
-                }
+                gameViewModel.StartGame()
             }, enabled = !gameViewModel.gameRunning){
-                Text("遊戲開始")
+                // 【修改點 6】按鈕文字顯示
+                Text(if (gameViewModel.gameRunning) "比賽進行中..." else "遊戲開始")
             }
 
 

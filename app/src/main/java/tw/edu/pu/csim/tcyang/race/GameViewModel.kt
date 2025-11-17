@@ -64,14 +64,15 @@ class GameViewModel : ViewModel(){
 
     fun ResetHorses() {
         for(horse in horses) {
-            // 這裡直接賦值，要求 HorseX 必須是 var
             horse.HorseX = 0
+            horse.HorseNumber = 0
         }
     }
 
     fun StartGame() {
-        gameRunning = true
+        if (gameRunning) return
         // 回到初使位置
+        gameRunning = true
         winningHorseNumber = 0 // 【新增】開始新遊戲時，重置獲勝編號
         ResetHorses() // 【新增】開始新遊戲時，重置馬匹位置
 
@@ -83,30 +84,35 @@ class GameViewModel : ViewModel(){
         // 啟動新的 Job，並儲存起來以便停止
         gameLoopJob?.cancel() // 取消任何舊的 Job
         gameLoopJob = viewModelScope.launch {
-            while (gameRunning) { // 每0.1秒循環
+            val finishLineX = screenWidthPx - 300f
+            while (true) { // 每0.1秒循環
                 delay(100)
+                circleX += 10
+                if (circleX >= screenWidthPx - 100f){
+                    circleX = 100f
+                    score += 1
+                }
                 if (winningHorseNumber == 0) {
-                    circleX += 10
+                    var winnerId = 0
 
-                    // 處理圓圈邊界碰撞
-                    if (circleX >= screenWidthPx - 100f){
-                        circleX = 100f
-                        // 需求：碰到右邊邊界,分數+1
-                        score += 1
-                    }
-
-                    // 處理賽馬移動和獲勝判斷
-                    val finishLineX = screenWidthPx - 300 // 終點線位置，根據馬匹圖形大小調整
-
-                    for( i in 0..2){
-                        horses[i].Run()
+                    for(horse in horses){
+                        horse.Run()
 
                         // 判斷馬匹是否抵達終點
-                        if(horses[i].HorseX >= finishLineX){
-                            // 有馬匹獲勝
-                            winningHorseNumber = horses[i].horseId // 記錄獲勝馬匹編號 (1, 2, 3)
-                            gameRunning = false // 停止遊戲循環
-                            break // 跳出 for 循環
+                        if(horse.HorseX >= finishLineX){
+                            winnerId = horse.horseId
+                            break
+                        }
+                    }
+
+                    if (winnerId != 0) {
+                        winningHorseNumber = winnerId // 設置獲勝者ID
+
+                        // 【修改點 4】使用新的 launch 協程處理延遲重置
+                        launch {
+                            delay(2000) // 顯示獲勝訊息 2 秒
+                            winningHorseNumber = 0 // 清除獲勝訊息
+                            ResetHorses() // 重置所有馬匹位置，開始下一場比賽
                         }
                     }
                 }
