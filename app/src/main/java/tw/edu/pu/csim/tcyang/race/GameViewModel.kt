@@ -33,6 +33,8 @@ class GameViewModel : ViewModel(){
     var score by mutableStateOf(0)
         private set
 
+    val horse = Horse()
+
 
 
     // 設定螢幕寬度與高度
@@ -61,6 +63,11 @@ class GameViewModel : ViewModel(){
                     circleX = 100f
                     // 需求：碰到右邊邊界,分數+1
                     score += 1
+                }
+
+                horse.Run()
+                if(horse.HorseX >= screenWidthPx - 300){
+                    horse.HorseX = 0
                 }
             }
         }
